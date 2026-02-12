@@ -33,19 +33,20 @@ Azureでは、CLIを使うことで仮想マシン、ストレージ、ネット
 |---|---|---|
 | ベース | Linux系コマンド風 | PowerShell |
 | 対応OS | Windows / macOS / Linux | 主にWindows（他OSも可） |
-| 学習コスト | 比較的低い | PowerShellの知識が必要 |
-| 主な用途 | クロスプラットフォーム、CI/CD | Windows管理、既存PS環境 |
 
 一般的には、  
 - **OSを問わず使いたい・CI/CDで使いたい → Azure CLI**
 - **PowerShellに慣れている → Azure PowerShell**  
-という選択が多いです。
+という選択が多いです。<br><br>
 
+また、Azure Automationなど自動化用のPaaSを使用する際は、Azure PowerShellのほうが親和性が高いです。<br>
+
+<br>
 ---
 
 ## どんな時に使う？
 
-Azure CLIは、以下のような場面でよく使われます。
+以下のような場面でよく使われます。
 
 - Azureリソースの作成・削除・設定変更
 - 環境構築の自動化（IaCの一部として）
@@ -64,16 +65,15 @@ Azure CLIは、以下のような場面でよく使われます。
 
 Azure CLIを使い始めるまでの基本ステップです。
 
-### 1. Azure CLIのインストール
+### CLIモジュールのインストール
 以下のいずれかの環境にインストールします。
 
-- ローカルPC（Windows / macOS / Linux）
+- ローカルPC（Windows）
+    - Azure CLI：https://learn.microsoft.com/ja-jp/cli/azure/install-azure-cli-windows?view=azure-cli-latest&pivots=msi
+    - Azure PowerShell：https://learn.microsoft.com/ja-jp/powershell/azure/install-azps-windows?view=azps-15.3.0&tabs=windowspowershell&pivots=windows-msi
 - Azure Cloud Shell（ブラウザ上で利用可能）
 
-※ Cloud Shellはインストール不要ですぐ使えます。
+※ Azure CLIも、Azure PowerShellも、<br>
+Azure Cloud Shellを使用すればインストール不要ですぐ使えます。
 
 ---
-
-### 2. Azureにログイン
-```bash
-az login
