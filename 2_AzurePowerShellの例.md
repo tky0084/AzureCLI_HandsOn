@@ -39,7 +39,6 @@ $Credential = Get-Credential
 Set-AzContext -Subscription "Subscription-spoke-a"
 
 # 仮想マシンを複数作成
-# 仮想マシンを複数作成
 for ($i = 1; $i -le $VMCount; $i++) {
 
     # 2桁ゼロ埋め (-01, -02, -03)
