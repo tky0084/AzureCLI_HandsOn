@@ -24,19 +24,29 @@
 `sample-vm-01` の形式で連番作成します。
 
 ```powershell
-$ResourceGroupName = "sample-rg"
-$Location          = "japaneast"
-$VMCount           = 3   # 作成する台数
+#=======================================
+#変数定義（必要に応じてパラメータを変更）
+#=======================================
+
+$SubID = "Subscription-spoke-a" #サブスクリプションのID
+$ResourceGroupName = "sample-rg" #リソースグループ名
+$Location          = "japaneast" #リージョン
+
+$VMCount           = 3   # 作成する仮想マシンの台数
 
 # 既存VNet / Subnet
 $VnetName   = "sample-vnet"
 $SubnetName = "default"
 
-# 管理者アカウント（1回のみ入力）
+# 管理者アカウント（ユーザー名、PWを定義。実行時に入力するため変更不要）
 $Credential = Get-Credential
 
+#=======================================
+#メイン処理
+#=======================================
+
 # サブスクリプションを指定
-Set-AzContext -Subscription "Subscription-spoke-a"
+Set-AzContext -Subscription $SubID
 
 # 仮想マシンを複数作成
 for ($i = 1; $i -le $VMCount; $i++) {
