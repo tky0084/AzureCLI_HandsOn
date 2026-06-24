@@ -58,25 +58,3 @@ Azure CLI と Azure PowerShell の違い
 - 実施した作業内容を記録として残したい
 
 といったケースでは、Portal操作よりもCLIの方が高い効率と再現性を実現できます。
-
-## どうやったら使えるようになる？
-
-### ローカル環境にモジュールをインストールして使用
-
-Azure CLIやAzure PowerShellを利用するためには、以下のいずれかの方法で実行環境を準備します。
-
-| 項目 | Azure CLI | Azure PowerShell |
-|---|---|---|
-| インストール方法 | https://learn.microsoft.com/ja-jp/cli/azure/install-azure-cli-windows?view=azure-cli-latest&pivots=msi | https://learn.microsoft.com/ja-jp/powershell/azure/install-azps-windows?view=azps-15.3.0&tabs=windowspowershell&pivots=windows-msi|
-
-### ローカル環境にインストールしないで使用
-
-Azure Portalから利用できる***Azure Cloud Shell***には、Azure CLIとAzure PowerShellの両方があらかじめインストールされています。
-
-そのため、ローカル環境へのインストールは不要で、ブラウザさえあればすぐに利用を開始できます。<br>
-初めてCLIを学習する場合は、環境構築が不要なCloud Shellから始めるのがおすすめです。
-
-![alt text](<スクリーンショット 2026-06-24 085941.png>)
-
-ただし、これは20分以上経過するとセッションが消えてしまうため、実際の現場作業では記録が消えてしまうリスクがあります。<br>
-したがって、環境ではローカル環境を使用したほうがいいと考えます。
