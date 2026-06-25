@@ -121,11 +121,12 @@ Azureのリソース操作は、基本的にサブスクリプション単位で
 
 以下のコマンドで現在接続しているサブスクリプションを確認できます。
 
-```powershell
-Get-AzContext
-```
+| 項目 | Azure CLI | Azure PowerShell |
+|---|---|---|
+| コマンド | ``` az account show ``` | ``` Get-AzContext ``` |
 
-実行例
+実行例(Azure PowerShell)<br>
+SubscriptionName、またはSubscriptionIdを確認してください
 
 ```text
 Name              : Subscription-A
@@ -136,10 +137,27 @@ TenantId          : xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 Environment       : AzureCloud
 ```
 
-特に以下の項目を確認してください。
+実行例(Azure CLI)<br>
+id、またはnameを確認してください
 
-- SubscriptionName
-- SubscriptionId
+```text
+{
+  "environmentName": "AzureCloud",
+  "homeTenantId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "isDefault": true,
+  "managedByTenants": [],
+  "name": "XXXXXXXXXXXXXXXXXXXXXXX",
+  "state": "Enabled",
+  "tenantId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "user": {
+    "cloudShellID": true,
+    "name": "XXXXXXXXXXXXXXXXXXXXXXX",
+    "type": "user"
+  }
+}
+
+```
 
 ---
 
@@ -147,23 +165,14 @@ Environment       : AzureCloud
 
 現在のサブスクリプションが目的の環境でない場合は、作業対象のサブスクリプションへ切り替えます。
 
-```powershell
-Set-AzContext -Subscription "<サブスクリプション名>"
-```
+引数はサブスクリプションのIDを指定します。<br>
+サブスクリプション名でも可能ですが、名前は重複が可能なので、IDで切り替えるほうが無難です。
 
-例
+| 項目 | Azure CLI | Azure PowerShell |
+|---|---|---|
+| コマンド | ``` az account set ---subscription "<サブスクリプションID>" ``` | ``` Set-AzContext -Subscription "<サブスクリプションID>" ``` |
 
-```powershell
-Set-AzContext -Subscription "Production-Subscription"
-```
-
-または、
-
-```powershell
-Set-AzContext -Subscription "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-```
-
-切り替え後は再度 `Get-AzContext` を実行し、意図したサブスクリプションに接続されていることを確認してください。
+切り替え後は再度 確認コマンドを実行し、意図したサブスクリプションに接続されていることを確認してください。
 
 ---
 

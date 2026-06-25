@@ -1,0 +1,254 @@
+# 実行コマンドの考え方
+
+ここでは、CLIでAzureリソースを構築する際の考え方について説明します。
+
+例として、仮想マシンを構築するケースを考えてみます。
+
+GUIであれば画面を順番にクリックしていけば作成できますが、CLIではまず「どのコマンドを使うのか」と「そのリソースを作るために何が必要なのか」を理解する必要があります。
+
+---
+
+# コマンドは公式ドキュメントを参照する
+
+Azureには数百種類以上のリソースが存在します。
+
+当然ながら、すべてのコマンドを覚えることは現実的ではありません。
+
+そのため、CLIで作業する際はまず公式ドキュメントを参照する習慣をつけましょう。
+
+以下のMicrosoft Learnを開きます。
+
+https://learn.microsoft.com/ja-jp/azure/?product=popular
+
+上部の **Products** から対象のリソースを選択します。
+
+今回は仮想マシンを作成するため、**Virtual Machines（仮想マシン）** を開きます。
+
+仮想マシンのページから、
+
+**リソース → 一般的なPowerShellコマンド**
+
+を参照すると、仮想マシン作成のサンプルや関連コマンドを確認できます。
+
+---
+
+# リソース同士の依存関係を把握する
+
+おそらく以下のページを開いていると思います。
+
+https://learn.microsoft.com/ja-jp/azure/virtual-machines/windows/quick-create-powershell
+
+それでは、仮想マシン作成コマンドを見てみましょう。
+
+仮想マシンを作成するコマンドは `New-AzVM` です。
+
+しかし、ヘルプを見ると非常に多くのパラメータが存在します。
+
+```powershell
+New-AzVM
+    [[-ResourceGroupName] <String>]
+    [[-Location] <String>]
+    [[-Zone] <String[]>]
+    -Name <String>
+    -Credential <PSCredential>
+    ...
+```
+
+初めて見ると圧倒されるかもしれませんが、まず確認するポイントがあります。
+
+---
+
+## 必須パラメータを確認する
+
+パラメータ一覧を見ると、
+
+```powershell
+[-ResourceGroupName]
+[-Location]
+```
+
+のように `[]` が付いているものと、
+
+```powershell
+-Name
+-Credential
+```
+
+のように `[]` が付いていないものがあります。
+
+PowerShellでは、
+
+- `[]` が付いている → 省略可能
+- `[]` が付いていない → 必須
+
+という意味になります。
+
+つまり、理論上は以下のコマンドだけでも仮想マシンを作成できます。
+
+```powershell
+New-AzVM -Name MyVm -Credential (Get-Credential)
+```
+
+---
+
+## とりあえず作ってみる
+
+実際に実行してみます。
+
+```powershell
+New-AzVM -Name MyVm -Credential (Get-Credential)
+```
+
+すると、仮想マシンは作成されます。
+
+しかし、出来上がった環境を確認すると、
+
+- リソースグループが自動作成される
+- 仮想ネットワークが自動作成される
+- 仮想マシン名が各リソース名として利用される
+- OSイメージもデフォルト値になる
+
+など、実際の要件とは大きく異なる構成になります。
+
+つまり、
+
+**「作れること」と「要件通りに作れること」は別問題**
+
+ということです。
+
+---
+
+# 必要なリソースを洗い出す
+
+ここで考えてみましょう。
+
+仮想マシンを作成するためには何が必要でしょうか。
+
+最低限必要になるものは以下です。
+
+- リソースグループ
+- 仮想ネットワーク
+- サブネット
+- 仮想マシン
+
+つまり、仮想マシンは単独で存在するわけではなく、
+
+```text
+リソースグループ
+    ↓
+仮想ネットワーク
+    ↓
+サブネット
+    ↓
+仮想マシン
+```
+
+という依存関係があります。
+
+まずは依存先のリソースから作成していく必要があります。
+
+---
+
+# リソースグループを作成する
+
+まずはリソースグループを作成します。
+
+リソースグループ作成には `New-AzResourceGroup` を使用します。
+
+```powershell
+New-AzResourceGroup `
+    -Name "myResourceGroup" `
+    -Location "japaneast"
+```
+
+これで仮想マシンを配置するための入れ物が作成できました。
+
+---
+
+# 仮想ネットワークを作成する
+
+続いて仮想ネットワークを作成します。
+
+仮想ネットワークのコマンドを調べる場合は、Microsoft Learnのリファレンスを確認します。
+
+https://learn.microsoft.com/ja-jp/powershell/module/az.network/new-azvirtualnetwork?view=azps-16.0.0
+
+なお、多くのAzureリソースには「リファレンス」ページが用意されています。
+
+新しいリソースを触る際は、まずリファレンスを確認する癖をつけるとよいでしょう。
+
+---
+
+## 仮想ネットワークにも依存関係がある
+
+仮想ネットワークを作成する場合も、いきなり作成できるわけではありません。
+
+仮想ネットワークにはサブネットが必要です。
+
+そのため、まずはサブネット定義を作成します。
+
+サブネット定義は、New-AzVirtualNetworkSubnetConfigの結果を変数に入れます。
+
+サブネットを複数つくる場合は、その数だけ変数を用意します。
+
+```powershell
+$mySubnet = New-AzVirtualNetworkSubnetConfig `
+    -Name mysubnet `
+    -AddressPrefix "10.0.0.0/27"
+```
+
+続いて仮想ネットワークを作成します。
+Subnetが複数ある場合、コンマ区切りで引数を指定します。
+
+```powershell
+New-AzVirtualNetwork `
+    -Name vnet01 `
+    -ResourceGroupName myResourceGroup `
+    -Location japaneast `
+    -AddressPrefix 10.0.0.0/24 `
+    -Subnet $mySubnet
+```
+
+これで仮想ネットワークとサブネットの作成が完了しました。
+
+---
+
+# 仮想マシンを作成する
+
+依存先のリソースが準備できたので、いよいよ仮想マシンを作成します。
+
+```powershell
+New-AzVM `
+    -ResourceGroupName myResourceGroup `
+    -Location japaneast `
+    -Name myVM `
+    -VirtualNetworkName vnet01 `
+    -SubnetName mysubnet `
+    -Image "Win2022AzureEdition" `
+    -Credential (Get-Credential)
+```
+
+これで仮想マシンを作成できます。
+
+---
+
+# まとめ
+
+CLIでAzureリソースを作成する際は、いきなりコマンドを書くのではなく、以下の順序で考えることが重要です。
+
+1. 作成したいリソースを明確にする
+2. Microsoft Learnでコマンドを調べる
+3. 必須パラメータを確認する
+4. リソースの依存関係を整理する
+5. 依存先のリソースから順番に作成する
+6. 最後に目的のリソースを作成する
+
+この考え方は仮想マシンだけではなく、
+
+- ストレージアカウント
+- Azure Firewall
+- Application Gateway
+- Azure OpenAI
+- SQL Database
+
+など、あらゆるAzureリソースの構築時にも共通して利用できます。
